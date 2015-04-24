@@ -1,5 +1,8 @@
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
     集合划分生成器，实现了：
@@ -13,6 +16,8 @@ public class SetPartitionGenerator {
     private int[] k;
     private int[] m;
     private int p;
+    private List<List<Integer>> partition;
+    private String formatedPartition;
 
     /**
      * 构造函数
@@ -100,16 +105,63 @@ public class SetPartitionGenerator {
     }
 
     /**
+     * 获得当前划分的划分大小
+     */
+    private int getCurrentPartitionSize(){
+        int max = 0;
+        for(int i=1;i<n;i++){
+            if(max < k[i]){
+                max = k[i];
+            }
+        }
+        return max + 1;
+    }
+
+    /**
+     * 将k[]转化成集合划分 partition 属性
+     */
+    private void k2partiton(){
+        int size = getCurrentPartitionSize();
+        partition = new ArrayList<List<Integer>>(size);
+        for(int i=0;i<size;i++){
+            partition.add(new ArrayList<Integer>());
+        }
+        for(int i=0;i<n;i++){
+            partition.get(k[i]).add(i);
+        }
+    }
+
+    /**
+     * 将partition属性转化成人看得懂的字符串 formatedPartition
+     */
+    private void formatCurrentPartition(){
+        k2partiton();
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        for(int i=0;i<partition.size();i++){
+            builder.append("{");
+            List<Integer> block = partition.get(i);
+            for(int j=0;j<block.size();j++){
+                builder.append(block.get(j));
+                if(j < block.size() - 1){
+                    builder.append(",");
+                }
+            }
+            builder.append("}");
+            if(i < partition.size() - 1){
+                builder.append(",");
+            }
+        }
+        builder.append("}");
+        formatedPartition = builder.toString();
+    }
+
+    /**
      * 输出当前的划分
      */
     private void printCurrentPartition(){
-        for(int i=0;i<n;i++){
-            System.out.print(k[i]);
-            if(i < n-1){
-                System.out.print(",");
-            }
-        }
-        System.out.println();
+        formatCurrentPartition();
+        System.out.println(formatedPartition);
     }
 
     /**
@@ -117,13 +169,8 @@ public class SetPartitionGenerator {
      * @param writer 输出流
      */
     private void dumpCurrentPartition(PrintWriter writer){
-        for(int i=0;i<n;i++){
-            writer.print(k[i]);
-            if(i < n-1){
-                writer.print(",");
-            }
-        }
-        writer.println();
+        formatCurrentPartition();
+        writer.println(formatedPartition);
     }
 
     /**
@@ -172,7 +219,7 @@ public class SetPartitionGenerator {
     }
 
     public static void main(String[] args){
-        SetPartitionGenerator generator = new SetPartitionGenerator(7,3);
-        generator.print();
+        SetPartitionGenerator generator = new SetPartitionGenerator(5,3);
+        generator.dump("output.txt");
     }
 }
